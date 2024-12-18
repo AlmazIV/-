@@ -12,12 +12,14 @@
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto"/>
             <RowDefinition Height="*"/>
+            <RowDefinition Height="auto"/>
+
         </Grid.RowDefinitions>
         <StackPanel Orientation="Horizontal" Grid.Row="0" Margin="10">
-            <TextBlock Text="Введите название для поиска" Width="180" Height="30" Margin="0,0,3,0"></TextBlock>
-            <TextBox Name="SearchTextBox" TextChanged="SearchTextBox_TextChanged" Width="270" FontSize="15" Margin="3"/>
+            <TextBlock Text="Введите название для поиска" Width="190" Height="30" Margin="0,0,3,0" FontSize="14"></TextBlock>
+            <TextBox Name="SearchTextBox" TextChanged="SearchTextBox_TextChanged" Width="210" FontSize="15" Margin="3"/>
 
-            <ComboBox Name="ComboType" Width="150" SelectionChanged="ComboType_SelectionChanged">
+            <ComboBox Name="ComboType" Width="125" SelectionChanged="ComboType_SelectionChanged">
                 <ComboBoxItem Content="Сортировка" IsSelected="True" />
                 <ComboBoxItem Content="Наименование по возрастанию" />
                 <ComboBoxItem Content="Наименование по убыванию" />
@@ -29,26 +31,30 @@
 
             </ComboBox>
 
-            <ComboBox Name="FilterComboBox" Width="150" Margin="10,0,0,0" SelectionChanged="FilterComboBox_SelectionChanged">
+            <ComboBox Name="FilterComboBox" Width="105" Margin="10,0,0,0" SelectionChanged="FilterComboBox_SelectionChanged">
                 <ComboBoxItem Content="Фильтрация" IsSelected="True" />
                 <ComboBoxItem Content="Все типы" />
                 <ComboBoxItem Content="ЗАО" />
                 <ComboBoxItem Content="МКК" />
                 <ComboBoxItem Content="МФО" />
-                <ComboBoxItem Content="ОАО" />                                                          
+                <ComboBoxItem Content="ОАО" />
                 <ComboBoxItem Content="ООО" />
                 <ComboBoxItem Content="ПАО" />
 
             </ComboBox>
+            <Button Name="AddAgentButton" Content="Добавить" Click="AddAgentButton_Click"  Width="100" Height="30" Margin="10,0,0,0"/>
         </StackPanel>
-
         <ListView Name="AgentListView" Grid.Row="1">
             <ListView.ItemTemplate>
                 <DataTemplate>
                     <Grid>
                         <Grid.ColumnDefinitions>
-                            <ColumnDefinition></ColumnDefinition>
-                            <ColumnDefinition></ColumnDefinition>
+                            <!-- Фиксированная ширина для первого столбца -->
+                            <ColumnDefinition Width="100"/>
+                            <!-- Звёздочная ширина для второго столбца (забирает оставшееся пространство) -->
+                            <ColumnDefinition Width="*"/>
+                            <!-- Фиксированная ширина для третьего столбца (для кнопки) -->
+                            <ColumnDefinition Width="150"/>
                         </Grid.ColumnDefinitions>
                         <Grid.RowDefinitions>
                             <RowDefinition Height="*"/>
@@ -57,7 +63,7 @@
                             <RowDefinition Height="*"/>
                         </Grid.RowDefinitions>
 
-                      
+                        <!-- Логотип -->
                         <Image Width="100" Grid.Column="0" Stretch="UniformToFill" HorizontalAlignment="Center">
                             <Image.Source>
                                 <Binding Path="Logo">
@@ -70,20 +76,38 @@
                             </Image.Source>
                         </Image>
 
-
+                        <!-- Текстовые данные -->
                         <WrapPanel Grid.Column="1" Grid.Row="0" HorizontalAlignment="Left">
-                            <TextBlock Text="{Binding AgentTypeTitle}"  FontSize="20" TextWrapping="Wrap"></TextBlock>
-                            <TextBlock Text=" | "  FontSize="20" ></TextBlock>
-                            <TextBlock Text="{Binding Title}" FontSize="20" ></TextBlock>
+                            <TextBlock Text="{Binding AgentTypeTitle}" FontSize="30" TextWrapping="Wrap"></TextBlock>
+                            <TextBlock Text=" | " FontSize="30"></TextBlock>
+                            <TextBlock Text="{Binding Title}" FontSize="30"></TextBlock>
                         </WrapPanel>
                         <TextBlock Text="{Binding Phone}" Grid.Column="1" Grid.Row="1" HorizontalAlignment="Left" FontSize="20" TextWrapping="Wrap"></TextBlock>
                         <WrapPanel Grid.Column="1" Grid.Row="2" HorizontalAlignment="Left">
-                            <TextBlock Text="Приоритетность: "  FontSize="20" ></TextBlock>
-                            <TextBlock  Text="{Binding Priority}"  FontSize="20"></TextBlock>
-                        </WrapPanel>                        
+                            <TextBlock Text="Приоритетность: " FontSize="20"></TextBlock>
+                            <TextBlock Text="{Binding Priority}" FontSize="20"></TextBlock>
+                        </WrapPanel>
+
+                        <!-- Кнопка -->
+                        <Button Content="Редактировать" Grid.Column="2" VerticalAlignment="Center" HorizontalAlignment="Right" Margin="10,0,0,0"
+            Width="140" Height="30" Tag="{Binding}" Click="Edit_Button_Click" />
                     </Grid>
+
                 </DataTemplate>
             </ListView.ItemTemplate>
         </ListView>
+        <StackPanel Grid.Row="2" Orientation="Horizontal" HorizontalAlignment="Right" Margin="10">
+            <TextBlock Name="TBCount" FontSize="14" VerticalAlignment="Center"/>
+            <TextBlock Name="TBallRecords" FontSize="14" VerticalAlignment="Center" Margin="5,0"/>
+            <Button Name="LeftDirButton" Content="&lt;" Width="30" Height="30" Margin="5,0" Click="LeftDirButton_Click"/>
+            <ListBox FontSize="14" Name="PageListBox" Margin="5,0" Width="200" Height="50" MouseUp="PageListBox_MouseUp">
+                <ListBox.ItemsPanel>
+                    <ItemsPanelTemplate>
+                        <WrapPanel Orientation="Horizontal"/>
+                    </ItemsPanelTemplate>
+                </ListBox.ItemsPanel>
+            </ListBox>
+            <Button Name="RightDirButton" Content="&gt;" Width="30" Height="30" Margin="5,0" Click="RightDirButton_Click"/>
+        </StackPanel>
     </Grid>
 </Page>

@@ -6,7 +6,8 @@
       xmlns:local="clr-namespace:ИсмагиловГлазки"
       mc:Ignorable="d" 
       d:DesignHeight="450" d:DesignWidth="800"
-      Title="AgentPage">
+      Title="AgentPage" IsVisibleChanged="Page_IsVisibleChanged">
+    
 
     <Grid>
         <Grid.RowDefinitions>
@@ -44,10 +45,10 @@
             </ComboBox>
             <Button Name="AddAgentButton" Content="Добавить" Click="AddAgentButton_Click"  Width="100" Height="30" Margin="10,0,0,0"/>
         </StackPanel>
-        <ListView Name="AgentListView" Grid.Row="1">
+        <ListView Name="AgentListView" Grid.Row="1" SelectionMode="Multiple" SelectionChanged="AgentListView_SelectionChanged">
             <ListView.ItemTemplate>
                 <DataTemplate>
-                    <Grid>
+                    <Grid Background="{Binding FonStyle}">
                         <Grid.ColumnDefinitions>
                             <!-- Фиксированная ширина для первого столбца -->
                             <ColumnDefinition Width="100"/>
@@ -55,16 +56,20 @@
                             <ColumnDefinition Width="*"/>
                             <!-- Фиксированная ширина для третьего столбца (для кнопки) -->
                             <ColumnDefinition Width="150"/>
+                            <ColumnDefinition Width="150"/>
+                            <ColumnDefinition Width="150"/>
+
                         </Grid.ColumnDefinitions>
                         <Grid.RowDefinitions>
                             <RowDefinition Height="*"/>
                             <RowDefinition Height="*"/>
                             <RowDefinition Height="*"/>
                             <RowDefinition Height="*"/>
+                            
                         </Grid.RowDefinitions>
 
                         <!-- Логотип -->
-                        <Image Width="100" Grid.Column="0" Stretch="UniformToFill" HorizontalAlignment="Center">
+                        <Image Grid.Column="0" Grid.RowSpan="4" Stretch="Uniform" HorizontalAlignment="Center" VerticalAlignment="Stretch">
                             <Image.Source>
                                 <Binding Path="Logo">
                                     <Binding.TargetNullValue>
@@ -82,14 +87,20 @@
                             <TextBlock Text=" | " FontSize="30"></TextBlock>
                             <TextBlock Text="{Binding Title}" FontSize="30"></TextBlock>
                         </WrapPanel>
+                        <TextBlock Text="{Binding Discount, StringFormat= Скидка 0 }" Opacity="{Binding Discount}" Grid.Column="5" Grid.Row="0" HorizontalAlignment="Right" Margin="5" FontSize="20"></TextBlock>
+
                         <TextBlock Text="{Binding Phone}" Grid.Column="1" Grid.Row="1" HorizontalAlignment="Left" FontSize="20" TextWrapping="Wrap"></TextBlock>
                         <WrapPanel Grid.Column="1" Grid.Row="2" HorizontalAlignment="Left">
+                            <TextBlock Text="Продажи за год: " FontSize="20"/>
+                            <TextBlock Text="{Binding Prod}" FontSize="20"/>
+                        </WrapPanel>
+                        <WrapPanel Grid.Column="1" Grid.Row="3" HorizontalAlignment="Left">
                             <TextBlock Text="Приоритетность: " FontSize="20"></TextBlock>
                             <TextBlock Text="{Binding Priority}" FontSize="20"></TextBlock>
                         </WrapPanel>
 
                         <!-- Кнопка -->
-                        <Button Content="Редактировать" Grid.Column="2" VerticalAlignment="Center" HorizontalAlignment="Right" Margin="10,0,0,0"
+                        <Button Content="Редактировать" Grid.Column="4" VerticalAlignment="Center" HorizontalAlignment="Right" Margin="10,30,0,0"
             Width="140" Height="30" Tag="{Binding}" Click="Edit_Button_Click" />
                     </Grid>
 
@@ -108,6 +119,8 @@
                 </ListBox.ItemsPanel>
             </ListBox>
             <Button Name="RightDirButton" Content="&gt;" Width="30" Height="30" Margin="5,0" Click="RightDirButton_Click"/>
+            <!-- Кнопка "Изменить приоритет на ..." -->
+            <Button Name="ChangePriorityButton" Content="Изменить приоритет на ..." Width="200" Height="30" Margin="10,0,0,0" Click="ChangePriorityButton_Click"  Visibility="Collapsed"/>
         </StackPanel>
     </Grid>
 </Page>

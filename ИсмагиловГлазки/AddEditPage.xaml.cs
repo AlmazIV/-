@@ -1,5 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
+using System.Data.Entity;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -27,6 +29,7 @@ namespace ИсмагиловГлазки
     public partial class AddEditPage : Page
     {
         private Agent currentAgent = new Agent();
+        private ObservableCollection<ProductSale> ProductSales { get; set; } = new ObservableCollection<ProductSale>();
 
         public AddEditPage(Agent selectedAgent = null)
         {
@@ -43,8 +46,28 @@ namespace ИсмагиловГлазки
 
             // Установите DataContext для привязки данных
             DataContext = currentAgent;
+            // Загрузка истории продаж
+            LoadProductSales();
+
+            // Загрузка списка продуктов
+            ProductComboBox.ItemsSource = ИсмагиловГлазкиSaveEntities.GetContext().Product.ToList();
 
         }
+        private void LoadProductSales()
+        {
+            if (currentAgent.ID != 0)
+            {
+                ProductSales = new ObservableCollection<ProductSale>(
+                    ИсмагиловГлазкиSaveEntities.GetContext()
+                    .ProductSale
+                    .Where(ps => ps.AgentID == currentAgent.ID)
+                    .Include(ps => ps.Product)
+                    .ToList()
+                );
+            }
+            ProductSalesDataGrid.ItemsSource = ProductSales;
+        }
+
 
 
         private void ChangePictureBtn_Click(object sender, RoutedEventArgs e)
@@ -53,9 +76,9 @@ namespace ИсмагиловГлазки
             if (myOpenFileDialog.ShowDialog() == true)
             {
                 //относительный путь
-                currentAgent.Logo=myOpenFileDialog.FileName;
+                currentAgent.Logo = myOpenFileDialog.FileName;
                 //загружаем в элемент картинку
-                LogoImage.Source=new BitmapImage(new Uri(myOpenFileDialog.FileName));
+                LogoImage.Source = new BitmapImage(new Uri(myOpenFileDialog.FileName));
             }
         }
 
@@ -166,7 +189,69 @@ namespace ИсмагиловГлазки
             }
         }
 
+        private void AddProduct_Click(object sender, RoutedEventArgs e)
+        {
+            if (ProductComboBox.SelectedItem is Product selectedProduct &&
+        int.TryParse(ProductCountTextBox.Text, out int productCount) &&
+        SaleDatePicker.SelectedDate is DateTime saleDate)
+            {
+                var newProductSale = new ProductSale
+                {
+                    AgentID = currentAgent.ID,
+                    ProductID = selectedProduct.ID,
+                    ProductCount = productCount,
+                    SaleDate = saleDate
+                };
 
+                ProductSales.Add(newProductSale);
+                ИсмагиловГлазкиSaveEntities.GetContext().ProductSale.Add(newProductSale);
+                ИсмагиловГлазкиSaveEntities.GetContext().SaveChanges();
+
+                LoadProductSales();
+            }
+            else
+            {
+                MessageBox.Show("Пожалуйста, заполните все поля корректно.", "Ошибка", MessageBoxButton.OK, MessageBoxImage.Error);
+            }
+        }
+
+        private void DeleteProduct_Click(object sender, RoutedEventArgs e)
+        {
+            if (MessageBox.Show("Вы точно хотите выполнить удаление?", "Внимание!", MessageBoxButton.YesNo, MessageBoxImage.Question) == MessageBoxResult.Yes)
+            {
+                try
+                {
+                    foreach (ProductSale history in ProductSalesDataGrid.Items)
+                    {
+                        ИсмагиловГлазкиSaveEntities.GetContext().ProductSale.Remove(history);
+
+                    }
+                    ИсмагиловГлазкиSaveEntities.GetContext().SaveChanges();
+
+                    MessageBox.Show("Информация удалена!");
+                    Manager.MainFrame.GoBack();
+
+                }
+                catch (Exception ex)
+                {
+                    MessageBox.Show(ex.Message.ToString());
+                }
+            }
+        }
+
+        private void ProductSerch_TextChanged(object sender, TextChangedEventArgs e)
+        {
+            string searchText = ProductSerch.Text.ToLower();
+
+            // Фильтрация данных
+            var filteredProducts = ИсмагиловГлазкиSaveEntities.GetContext().Product
+                .Where(p => p.Title.ToLower().Contains(searchText))
+                .Select(p => p.Title)
+                .ToList();
+
+            // Обновление источника данных
+            ProductComboBox.ItemsSource = filteredProducts;
+        }
     }
 }
 

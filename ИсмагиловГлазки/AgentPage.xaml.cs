@@ -12,6 +12,7 @@ using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using System.Windows.Navigation;
 using System.Windows.Shapes;
+using static ИсмагиловГлазки.ChangePriorityWindow;
 
 namespace ИсмагиловГлазки
 {
@@ -40,9 +41,9 @@ namespace ИсмагиловГлазки
             // Установка пагинации и отображение первой страницы
             ChangePage(0, 0); // Инициализация первой страницы
         }
-        private void UpdateAgents()
+        public void UpdateAgents()
         {
-
+           
             // Получаем всех агентов из базы данных
             var currentAgents = ИсмагиловГлазкиSaveEntities.GetContext().Agent.ToList();
             TableList = currentAgents;
@@ -57,6 +58,12 @@ namespace ИсмагиловГлазки
                     break;
                 case 2:
                     currentAgents = currentAgents.OrderByDescending(agent => agent.Title).ToList();
+                    break;
+                case 3:
+                    currentAgents = currentAgents.OrderBy(agent => agent.Discount).ToList(); // Скидка по возрастанию
+                    break;
+                case 4:
+                    currentAgents = currentAgents.OrderByDescending(agent => agent.Discount).ToList(); // Скидка по убыванию
                     break;
                 case 5:
                     currentAgents = currentAgents.OrderBy(agent => agent.Priority).ToList();
@@ -99,25 +106,7 @@ namespace ИсмагиловГлазки
 
 
 
-            // Сортировка по ComboType
-            var selectedSort = (ComboType.SelectedItem as ComboBoxItem)?.Content.ToString();
-            if (selectedSort == "Наименование по возрастанию")
-            {
-                currentAgents = currentAgents.OrderBy(agent => agent.Title).ToList();
-            }
-            else if (selectedSort == "Наименование по убыванию")
-            {
-                currentAgents = currentAgents.OrderByDescending(agent => agent.Title).ToList();
-            }
-
-            if (selectedSort == "Приоритет по возрастанию")
-            {
-                currentAgents = currentAgents.OrderBy(agent => agent.Priority).ToList();
-            }
-            else if (selectedSort == "Приоритет по убыванию")
-            {
-                currentAgents = currentAgents.OrderByDescending(agent => agent.Priority).ToList();
-            }
+            
             
             // Обновляем источник данных для ListView
             if (AgentListView != null)
@@ -171,8 +160,10 @@ namespace ИсмагиловГлазки
         private void Edit_Button_Click(object sender, RoutedEventArgs e)
         {
             Manager.MainFrame.Navigate(new AddEditPage((sender as Button).DataContext as Agent));//кнопка редактирования
+
         }
-       
+      
+
         private void PageListBox_MouseUp(object sender, MouseButtonEventArgs e)
         {
             ChangePage(0,Convert.ToInt32(PageListBox.SelectedItem.ToString())-1);
@@ -288,6 +279,29 @@ namespace ИсмагиловГлазки
                 if (AgentListView != null)
 
                 AgentListView.Items.Refresh();
+            }
+        }
+
+        private void ChangePriorityButton_Click(object sender, RoutedEventArgs e)
+        {
+            var selectedAgents = AgentListView.SelectedItems.Cast<Agent>().ToList();
+            var changePriorityWindow = new ChangePriorityWindow(selectedAgents);
+            changePriorityWindow.ShowDialog();
+        }
+
+        private void AgentListView_SelectionChanged(object sender, SelectionChangedEventArgs e)
+        {
+            var selectedItems = AgentListView.SelectedItems;
+            ChangePriorityButton.Visibility = selectedItems.Count > 1 ? Visibility.Visible : Visibility.Collapsed;
+        }
+
+        private void Page_IsVisibleChanged(object sender, DependencyPropertyChangedEventArgs e)
+        {
+            if (Visibility == Visibility.Visible)
+            {
+                ИсмагиловГлазкиSaveEntities.GetContext().ChangeTracker.Entries().ToList().ForEach(p => p.Reload());
+                AgentListView.ItemsSource = ИсмагиловГлазкиSaveEntities.GetContext().Agent.ToList();
+                UpdateAgents();
             }
         }
     }

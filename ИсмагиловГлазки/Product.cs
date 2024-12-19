@@ -24,6 +24,10 @@ namespace ИсмагиловГлазки
     
         public int ID { get; set; }
         public string Title { get; set; }
+        public override string ToString()
+        {
+            return Title; // Или любое другое поле, которое вы хотите использовать для отображения
+        }
         public Nullable<int> ProductTypeID { get; set; }
         public string ArticleNumber { get; set; }
         public Nullable<int> ProductionPersonCount { get; set; }
